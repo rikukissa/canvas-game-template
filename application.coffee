@@ -1,5 +1,5 @@
 class Application
-	constructor: () ->
+  constructor: () ->
     @canvas = $('canvas')[0]
     @ctx = @canvas.getContext '2d'
     @keys = new Keys
