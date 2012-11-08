@@ -24,26 +24,16 @@ class window.Keys
     @down = false
     @left = false
     @right = false
+    @commands =
+      37: 'left'
+      38: 'up'
+      39: 'right'
+      40: 'down'
     @loadEvents()
   loadEvents: () ->
-    window.addEventListener 'keydown', (e) =>
-      if e.keyCode == 37
-        @left = true
-      if e.keyCode == 38
-        @up = true
-      if e.keyCode == 39
-        @right = true
-      if e.keyCode == 40
-        @down = true
-    window.addEventListener 'keyup', (e) =>
-      if e.keyCode == 37
-        @left = false
-      if e.keyCode == 38
-        @up = false
-      if e.keyCode == 39
-        @right = false
-      if e.keyCode == 40
-        @down = false
+    $(window).bind 'keydown keyup', (e) =>
+      if @commands.hasOwnProperty e.keyCode
+        @[@commands[e.keyCode]] = e.type == 'keydown'
 
 class window.Assets
   constructor: (@arr) ->
