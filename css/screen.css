@@ -3,4 +3,5 @@ html,body {
 }
 canvas#main {
   display: block;
+  background: #000;
 }
