@@ -100,6 +100,7 @@ class window.Keys
   loadEvents: () ->
     $(window).bind 'keydown keyup', (e) =>
       if @commands.hasOwnProperty e.keyCode
+        e.preventDefault()
         @[@commands[e.keyCode]] = e.type == 'keydown'
 
 class window.Assets
