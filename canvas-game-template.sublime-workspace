@@ -1,0 +1,403 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "# This is an example script to demonstrate the features of this template\nasteroid = false\nclass Application\n  constructor: () ->\n    @canvas = $('canvas')[0]\n    @ctx = @canvas.getContext '2d'\n    @keys = new Keys\n    @world = new World('2d')\n    @camera = new Camera @canvas\n  \n    @player = null\n  update: () ->\n    @render()\n    window.requestAnimFrame () =>\n      @update()\n\n  initialize: () ->\n    # Create our player object\n    @player = new Body\n    @player.type = 'dynamic'\n    \n    @player.userData = 'player'\n    \n    @player.position =\n      x: 0\n      y: 0\n    \n    @player.dimensions =\n      w: 20 # Width\n      h: 30 # Height\n\n    @player.shootLock = false\n    @player.shoot = () =>\n      if @player.shootLock\n        return\n      @player.shootLock = true\n      \n      bullet = new Body\n      bullet.type = 'dynamic'\n      bullet.userData = 'bullet'\n      bullet.position =\n        x: @player.position.x + (@player.dimensions.w / 2 + 10) * Math.cos(@player.angle)\n        y: @player.position.y + (@player.dimensions.h / 2 + 10) * Math.sin(@player.angle)\n      bullet.dimensions =\n        w: 5\n        h: 5\n      bullet.onCollision = (b) ->\n        if b.userData == 'asteroid'\n          @alive = false\n\n      bullet.angle = @player.angle\n      bullet.forces.y = 5\n      @world.createBody bullet\n\n    # Now we can add the body to our world\n    @world.createBody @player\n\n    # Lets create an asteroid\n    asteroid = new Body\n    asteroid.type = 'dynamic'\n    asteroid.userData = 'asteroid'\n    asteroid.position =\n      x: 0\n      y: -150\n    asteroid.dimensions =\n      w: 100\n      h: 100\n    asteroid.angle = -90 * d2r\n    # asteroid.angle = Math.random() * (360 * Math.PI/180)\n    #asteroid.forces.s = 0.01\n    for i in [0..0]\n      fxt = new Fixture\n      fxt.dimensions =\n        w: Math.random() * asteroid.dimensions.w\n        h: Math.random() * asteroid.dimensions.h\n      #fxt.angle = Math.random() * (360 * Math.PI/180)\n      fxt.position =\n        x: -50\n        y: 50\n        #x: asteroid.dimensions.w * (Math.random() * -1 + 0.5)\n        #y: asteroid.dimensions.h * (Math.random() * -1 + 0.5)\n      \n      asteroid.createFixture fxt\n      \n      console.log 'Asd:', asteroid.angle / d2r\n      console.log 'Fxt:', fxt.position.x, fxt.position.y\n    \n    asteroid.onCollision = (b) =>\n      if b.userData != 'bullet'\n        return\n      for f in asteroid.fixtures\n        f.detach()\n    @world.createBody asteroid\n    @update()\n  \n  render: () ->\n    cnv = @canvas\n    ctx = @ctx\n    \n    if @keys.up\n      @player.forces.y += 0.1 if @player.forces.y < 4\n    if @keys.down\n      @player.forces.y -= 0.1 if @player.forces.y > 0\n    if @keys.left\n      @player.forces.s -= 0.1\n    if @keys.right\n      @player.forces.s += 0.1\n\n    if @keys.space\n      @player.shoot()\n    else\n      @player.shootLock = false\n    @player.shoot()\n    @world.step()\n\n    # Make sure that canvas keeps the window dimensions\n    if cnv.width != window.innerWidth || cnv.height != window.innerHeight\n      cnv.width = 2 * Math.round(window.innerWidth / 2)\n      cnv.height = 2 * Math.round(window.innerHeight / 2);\n\n    # Save\n    ctx.save()\n    ctx.clearRect 0, 0, cnv.width, cnv.height\n    \n    # Keep the 0,0 point in the middle of the canvas\n    ctx.translate cnv.width / 2, cnv.height / 2\n    \n    # DEBUG - Center of the universe\n    ctx.fillStyle = 'red'\n    ctx.beginPath()\n    ctx.arc(0, 0, 2, 0, Math.PI * 2, false)\n    ctx.closePath()\n    ctx.fill()\n    \n    for b in @world.bodies\n      if !b.alive\n        continue\n      pos = b.position\n      dim = b.dimensions\n      ctx.save()\n      ctx.translate pos.x, pos.y\n      ctx.rotate b.angle\n      \n      # Draw body\n      ctx.fillStyle = 'rgba(0, 100, 0, 0.5)'\n      ctx.strokeStyle = 'rgba(0, 150, 0, 1)'\n      ctx.fillRect -dim.w / 2, 0 - dim.h / 2, dim.w, dim.h\n      ctx.strokeRect -dim.w / 2, 0 - dim.h / 2, dim.w, dim.h\n      \n      # Draw fixtures\n      for f in b.fixtures\n        ctx.save()\n        pos = f.position\n        dim = f.dimensions\n        ctx.rotate f.angle\n        ctx.fillRect pos.x - dim.w / 2, pos.y - dim.h / 2, dim.w, dim.h\n        ctx.strokeRect pos.x - dim.w / 2, pos.y - dim.h / 2, dim.w, dim.h\n        ctx.restore()\n      \n      ctx.restore()\n\n    # Restore\n    @ctx.restore()\n\n$(document).ready () ->\n  app = new Application\n  app.assets = new Assets([])\n  app.assets.load () ->\n    app.initialize()",
+			"file": "application.coffee",
+			"file_size": 4382,
+			"file_write_time": 1353237367000000,
+			"settings":
+			{
+				"buffer_size": 4392,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "base.coffee",
+			"settings":
+			{
+				"buffer_size": 5371,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "tests/test.coffee",
+			"settings":
+			{
+				"buffer_size": 838,
+				"line_ending": "Unix",
+				"name": "test.coffee"
+			}
+		},
+		{
+			"file": "tests/index.html",
+			"settings":
+			{
+				"buffer_size": 323,
+				"line_ending": "Unix",
+				"name": "index.html"
+			}
+		},
+		{
+			"file": "css/screen.css",
+			"settings":
+			{
+				"buffer_size": 80,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"command_palette":
+	{
+		"height": 327.0,
+		"selected_items":
+		[
+			[
+				"packag",
+				"Package Control: Install Package"
+			],
+			[
+				"packa",
+				"Package Control: Install Package"
+			]
+		],
+		"width": 575.0
+	},
+	"console":
+	{
+		"height": 174.0
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"file_history":
+	[
+		"/Users/rikurouvila/Documents/canvas-game-template/base.coffee",
+		"/Users/rikurouvila/Documents/canvas-game-template/application.coffee",
+		"/Users/rikurouvila/Documents/canvas-game-template/index.html",
+		"/Users/rikurouvila/Documents/canvas-racing/coffee/game.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/models/section-collection.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/views/news.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/stylus/css/screen.styl",
+		"/Users/rikurouvila/Documents/kaukokiito/views/index.jade",
+		"/Users/rikurouvila/Documents/kaukokiito/app/models/locations-collection.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/views/locations.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/router.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/main.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/server/app.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/controllers/application.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/models/locations.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/models/locatios.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/stylus/css/tablet.styl",
+		"/Users/rikurouvila/Documents/kaukokiito/settings.json",
+		"/Users/rikurouvila/Documents/kaukokiito/server.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/views/search.coffee",
+		"/Users/rikurouvila/Dropbox/Fixteri/Client work/kaukokiito/tekstit/Kaukokiito_fi_tekstit_130912_the.docx",
+		"/Users/rikurouvila/Documents/kaukokiito/package.json",
+		"/Users/rikurouvila/Documents/kaukokiito/.gitignore",
+		"/Users/rikurouvila/Documents/kaukokiito/app/models/news-collection.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/models/search-collection.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/app/models/search.coffee",
+		"/Users/rikurouvila/Documents/kaukokiito/public/news.json",
+		"/Users/rikurouvila/Documents/kaukokiito/app/css/screen.styl",
+		"/Users/rikurouvila/Documents/kaukokiito/app/index.jade",
+		"/Users/rikurouvila/Documents/kaukokiito/public/css/tablet.css"
+	],
+	"find":
+	{
+		"height": 39.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+			""
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"@ ",
+			"cp",
+			"BOTTOM",
+			"ctx",
+			"world",
+			"')\n",
+			"id",
+			"me siirrämme",
+			"column",
+			"column\n\n\n.column",
+			"dark",
+			"icon",
+			"timeline-small",
+			"arrow",
+			".column",
+			"}",
+			"()\n",
+			"Eura\nForssa\nHelsinki\nHämeenlinna\nJoensuu\nJyväskylä\nKajaani\nKemi\nKokkola\nKouvola\nKuopio\nNokia\nKuusamo\nLahti\nLappeenranta\nMaarianhamina\nMikkeli\nOulu\nPori\nRauma\nRovaniemi\nSalo\nSastamala\nSeinäjoki\nTampere\nTurku\nVaasa\nVarkaus\nYlivieska",
+			"Eura",
+			"a(href='#') ",
+			"(href='#')",
+			"a(href='#')",
+			"div",
+			"toimipaikat",
+			"search",
+			": ",
+			"model",
+			"pageView",
+			"#search h1",
+			"red",
+			"input",
+			"app.use"
+		],
+		"highlight": true,
+		"in_selection": true,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"tp",
+			"},",
+			" \n",
+			" \n ",
+			"",
+			"kaukoputki",
+			" ",
+			"page"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"file": "application.coffee",
+					"settings":
+					{
+						"buffer_size": 4392,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								894,
+								894
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 7.0,
+						"translation.y": 305.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 1,
+					"file": "base.coffee",
+					"settings":
+					{
+						"buffer_size": 5371,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								4824,
+								4824
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 2043.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 2,
+					"file": "tests/test.coffee",
+					"settings":
+					{
+						"buffer_size": 838,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								682,
+								682
+							]
+						],
+						"settings":
+						{
+							"auto_name": "test.coffee",
+							"syntax": "Packages/CoffeeScript/CoffeeScript.tmLanguage",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"file": "tests/index.html",
+					"settings":
+					{
+						"buffer_size": 323,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								15,
+								15
+							]
+						],
+						"settings":
+						{
+							"auto_name": "index.html",
+							"syntax": "Packages/HTML/HTML.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				},
+				{
+					"buffer": 4,
+					"file": "css/screen.css",
+					"settings":
+					{
+						"buffer_size": 80,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								58,
+								58
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/CSS/CSS.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 0.0
+	},
+	"input":
+	{
+		"height": 31.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 100.0
+	},
+	"replace":
+	{
+		"height": 64.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"selected_items":
+		[
+			[
+				"",
+				".gitignore"
+			]
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 500.0,
+		"selected_items":
+		[
+		],
+		"width": 380.0
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 126.0,
+	"status_bar_visible": true
+}

@@ -7,6 +7,33 @@ window.requestAnimFrame = ((callback) ->
   (callback) ->
     window.setTimeout callback, 1000 / 60
 )()
+window.d2r = 0.0174532925
+window.logged = {}
+window.log = (str) ->
+  if !window.logged[str]
+    console.log str
+    window.logged[str] = true
+
+class window.Collision
+  constructor: (@collider, @target) ->
+    cp = @collider.position
+    cd = @collider.dimensions
+    tp = @target.position
+    td = @target.dimensions
+
+    c =
+      top: cp.y - cd.h / 2
+      bottom: cp.y + cd.h / 2 
+      right: cp.x + cd.w / 2
+      left: cp.x - cd.w / 2
+    t =
+      top: tp.y - td.h / 2
+      bottom: tp.y + td.h / 2 
+      right: tp.x + td.w / 2
+      left: tp.x - td.w / 2
+    @collided = false
+    if c.top < t.bottom and c.bottom > t.top and c.left < t.right and c.right > t.left
+      @collided = true
 
 class window.World
   constructor: (@type) ->
@@ -19,15 +46,43 @@ class window.World
     @bodies.push b
   step: () ->
     for b in @bodies
-      @move b
+      if b.alive
+        @move b
   move: (b) ->
+    if b.type == 'static'
+      return
     if typeof b.onMove == 'function'
       b.onMove()
-    else
-      b.position.y += Math.sin(b.angle) * b.forces.y
-      b.position.x += Math.cos(b.angle) * b.forces.y
-      b.angle += b.forces.s
+
+    b.position.y += Math.sin(b.angle) * b.forces.y
+    b.position.x += Math.cos(b.angle) * b.forces.y
+    b.angle += b.forces.s
+    if b.userData == 'player'
       b.forces.s = 0
+
+    # Check for collisions
+    # o for other body
+    for o in @bodies
+      if o.id == b.id || !o.alive
+        continue     
+      
+      # First go though the fixtures
+      #for f in o.fixtures
+      #  collision = new Collision b, f
+      #  if collision.collided
+      #    if typeof f.onCollision == 'function'
+      #      f.onCollision b
+      #    if typeof b.onCollision == 'function'
+      #      b.onCollision f
+      
+      # Then the body itself       
+      collision = new Collision b, o
+      if collision.collided
+        if typeof o.onCollision == 'function'
+          o.onCollision b
+        if typeof b.onCollision == 'function'
+          b.onCollision o
+
 class window.Keys
 	constructor: () ->
     @up = false
@@ -115,6 +170,7 @@ class window.Debugger
 
 class window.Body
   constructor: () ->
+    @id = Math.floor(Math.random()*167772234242153422).toString(16)
     @position =
       x: 0
       y: 0
@@ -130,8 +186,8 @@ class window.Body
       h: 0
     @angle = 0
     @fixtures = []
+    @alive = true
     @type = 'static'
-
     @onMove = false
     @onCollision = false
   createFixture: (fix) ->
@@ -140,6 +196,7 @@ class window.Body
 
 class window.Fixture
   constructor: () ->
+    @id =  Math.floor(Math.random()*167772234242153422).toString(16)
     @position =
       x: 0
       y: 0
@@ -148,3 +205,30 @@ class window.Fixture
       w: 0
       d: 0
       h: 0
+    @angle = 0
+    @onCollision = false
+  
+  angleFromBodyCenter: () ->  
+    return Math.atan(@position.y / @position.x)
+  
+  radiusToBodyCenter: () ->
+    a = Math.pow(@position.x, 2)
+    b = Math.pow(@position.y, 2)
+    return Math.sqrt(a + b)    
+  
+  detach: () ->
+    b = new Body
+    b.type = 'dynamic'
+    b.userData = 'fake'
+    b.angle = @parent.angle + @angle
+
+    rad = @radiusToBodyCenter()
+    ang = @angleFromBodyCenter()
+    b.position =
+      x: @parent.position.x + rad * Math.cos((b.angle + ang))
+      y: @parent.position.y + rad * Math.sin((b.angle + ang))
+    
+    log ang / d2r
+    
+    b.dimensions = @dimensions
+    @parent.parent.createBody b
