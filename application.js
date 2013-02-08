@@ -1,15 +1,3 @@
-// http://paulirish.com/2011/requestanimationframe-for-smart-animating/
-window.requestAnimFrame = (function(){
-  return  window.requestAnimationFrame       || 
-          window.webkitRequestAnimationFrame || 
-          window.mozRequestAnimationFrame    || 
-          window.oRequestAnimationFrame      || 
-          window.msRequestAnimationFrame     || 
-          function( callback ){
-            window.setTimeout(callback, 1000 / 60);
-          };
-})();
-
 function Canvas(element) {
   this.el = element;
   this.ctx = element.getContext('2d');
@@ -19,31 +7,18 @@ function Canvas(element) {
   }
 }
 
-function Player() {
-  this.w = 70;
-  this.h = 150;
-  this.x = 100;
-  this.y = 0;
-  this.render = function(ctx) {
-    ctx.fillRect(this.x + this.w / 2, ctx.canvas.height - this.h, this.w, this.h)
-  }
-}
-
-var canvas, player;
-function tick() {
-  player.render(canvas.ctx);
-}
-
-function mainLoop() {
-  canvas.ctx.clearRect(0, 0, canvas.el.width, canvas.el.height)
-  tick();
-  window.requestAnimFrame(mainLoop);
-}
-
+var canvas;
+var mousedown = false;
 
 window.onload = function() {
-  canvas = new Canvas(document.getElementById('main'));
+  canvas = new Canvas($('#main')[0]);
   canvas.fitToScreen();
-  player = new Player();
-  mainLoop();
+  $('#main').on('mousedown', function() { mousedown = true });
+  $('#main').on('mouseup', function() { mousedown = false; });
+  $
+  ('#main').on('mousemove', function(e) {
+    if(mousedown) {
+      canvas.ctx.fillRect(e.offsetX, e.offsetY, 10, 10);
+    }
+  });
 }
